@@ -7,26 +7,20 @@ const port = 3001
 const connectionString = process.env.MONGO_URI
 const client = new MongoClient(connectionString)
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
   try {
-    await client
+    await client.connect()
+    await client.db("admin").command({ ping: 1 })
+    res.json({ message: "Successfully connected to the database!"})
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: "Failed to connect to the database."})
   }
 })
 
-async function run() {
-  try {
-    await client.connect()
-    await client.db("admin").command({ ping: 1});
-    console.log("Connected successfully to MongoDB!")
-  } finally {
-    await client.close();
-  }
-}
-
-run().catch(console.dir);
 
 
 app.listen(port, () => {
-  console.log('Listening on port:' + port)
+  console.log(`Server is running on http://localhost:${port}`)
 })
 
